@@ -1,44 +1,71 @@
-import random 
-import math
-def play():
-    user=input("what is you choise 'r' for rock , 'p' for paper, 's' for scissor ")
-    user=user.lower()
-    while user not in (['r','p','s']):
-        print("input is incorrect re enter")
-        user=input("what is you choise 'r' for rock , 'p' for paper, 's' for scissor ")
-        
-    user=user.lower() 
-    computer=random.choice(['r','p','s'])
-    if user==computer:
-        return(0,user,computer) 
-    #r>s,p>r,s>p
-    if is_win(user,computer):
-        return(1,user,computer) 
-    return (-1,user,computer) 
+"""
+Hangman implementation by Kylie Ying
 
-def is_win(player,opponent):
-    if((player== 'r'and opponent== 's') or (player== 'p' and opponent== 'r') or (player== 's' and opponent== 'p')):
-        return True
-    return False
+YouTube Kylie Ying: https://www.youtube.com/ycubed 
+Twitch KylieYing: https://www.twitch.tv/kylieying 
+Twitter @kylieyying: https://twitter.com/kylieyying 
+Instagram @kylieyying: https://www.instagram.com/kylieyying/ 
+Website: https://www.kylieying.com
+Github: https://www.github.com/kying18 
+Programmer Beast Mode Spotify playlist: https://open.spotify.com/playlist/4Akns5EUb3gzmlXIdsJkPs?si=qGc4ubKRRYmPHAJAIrCxVQ 
+"""
 
-def play_best_of(n):
-    player_wins = 0 
-    opponent_wins = 0
-    wins_necessary = math.ceil(n/2)
-    while player_wins < wins_necessary and opponent_wins < wins_necessary:
-        result,user,computer = play()
-        if result == 0:
-            print("It is a tie")
-        elif result == 1:
-            player_wins += 1
-            print("You choose {}, computer choose {} You won!!! \n".format(user, computer))
+import random
+from words import words
+from hangman_visual import lives_visual_dict
+import string
+
+def get_valid_word(words):
+    word = random.choice(words)  # randomly chooses something from the list
+    while '-' in word or ' ' in word:
+        word = random.choice(words)
+
+    return word.upper()
+
+
+def hangman():
+    word = get_valid_word(words)
+    word_letters = set(word)  # letters in the word
+    alphabet = set(string.ascii_uppercase)
+    used_letters = set()  # what the user has guessed
+
+    lives = 7
+
+    # getting user input
+    while len(word_letters) > 0 and lives > 0:
+        # letters used
+        # ' '.join(['a', 'b', 'cd']) --> 'a b cd'
+        print('You have', lives, 'lives left and you have used these letters: ', ' '.join(used_letters))
+
+        # what current word is (ie W - R D)
+        word_list = [letter if letter in used_letters else '-' for letter in word]
+        print(lives_visual_dict[lives])
+        print('Current word: ', ' '.join(word_list))
+
+        user_letter = input('Guess a letter: ').upper()
+        if user_letter in alphabet - used_letters:
+            used_letters.add(user_letter)
+            if user_letter in word_letters:
+                word_letters.remove(user_letter)
+                print('')
+
+            else:
+                lives = lives - 1  # takes away a life if wrong
+                print('\nYour letter,', user_letter, 'is not in the word.')
+
+        elif user_letter in used_letters:
+            print('\nYou have already used that letter. Guess another letter.')
+
         else:
-            opponent_wins += 1
-            print("You choose {}, computer choose {} You lost \n".format(user, computer))
-    if player_wins>opponent_wins:
-        print("You won best of {} matches \n".format(n))
+            print('\nThat is not a valid letter.')
+
+    # gets here when len(word_letters) == 0 OR when lives == 0
+    if lives == 0:
+        print(lives_visual_dict[lives])
+        print('You died, sorry. The word was', word)
     else:
-        print("You lost best of {} matches \n".format(n))
+        print('YAY! You guessed the word', word, '!!')
+
 
 if __name__ == '__main__':
-    play_best_of(3) 
+    hangman()
